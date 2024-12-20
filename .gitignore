@@ -2,6 +2,7 @@
 **/*.freezed.dart
 **/*.g.dart
 **/*.gm.dart
+**/*.gr.dart
 
 # FVM
 .fvm/
@@ -66,6 +67,12 @@ unlinked_spec.ds
 /android/app/debug
 /android/app/profile
 /android/app/release
+AndroidManifest.xml
+build.gradle
+settings.gradle
+gradle.properties
+gradle-wrapper.properties
+styles.xml
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -96,11 +103,19 @@ unlinked_spec.ds
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+/ios/Runner/AppDelegate.swift
+/ios/Flutter/AppFrameworkInfo.plist
+/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+/ios/Runner.xcworkspace/contents.xcworkspacedata
+/ios/Flutter/Debug.xcconfig
+/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+/ios/RunnerTests/RunnerTests.swift
+/ios/Runner/Runner-Bridging-Header.h
+/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+/ios/Flutter/Release.xcconfig
 
 # Symbols
-app.*.symbols
-
-# Symbolication related
 app.*.symbols
 
 # Obfuscation related
@@ -113,3 +128,8 @@ app.*.map.json
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+
+
+
+
