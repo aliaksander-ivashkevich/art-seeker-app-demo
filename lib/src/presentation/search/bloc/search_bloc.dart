@@ -1,9 +1,15 @@
-import 'package:bloc/bloc.dart';
+import 'dart:async';
 
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:rxdart/rxdart.dart';
+
+import '../../../../di/app_di.dart';
 import '../../../data/inputs/search_art_previews_input.dart';
 import '../../../data/models/pagination/pagination.dart';
 import '../../../data/models/preview/art_preview.dart';
 import '../../../data/repositories/art_repository.dart';
+import '../../../navigation/router.dart';
 
 part 'search_event.dart';
 part 'search_pagination_state.dart';
@@ -12,47 +18,94 @@ part 'search_state.dart';
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final ArtRepository _artRepository;
 
+  final StreamController<String> _queryController = StreamController<String>();
+
   SearchBloc({
     required ArtRepository artRepository,
   })  : _artRepository = artRepository,
-        super(const SearchIdle()) {
+        super(
+          const SearchIdle(suggestions: <String>{}),
+        ) {
     on<SearchQuery>(_onQuery);
+    on<SearchCompleted>(_handleSearchResult);
     on<SearchPaginate>(_onPaginate);
     on<SearchScroll>(_onScroll);
+    on<SearchResultSelected>(_onSearchResultSelected);
+    on<UpdateSearchSuggestions>(_onUpdateSearchSuggestions);
+    _initializeStream();
   }
 
-  Future<void> _onQuery(
-    SearchQuery event,
-    Emitter<SearchState> emit,
-  ) async {
-    try {
-      emit(
-        const SearchLoading(),
-      );
+  void _initializeStream() {
+    _queryController.stream
+        .debounceTime(
+          const Duration(milliseconds: 300),
+        )
+        .switchMap(
+          (String query) => _searchArt(
+            query: query,
+            currentSuggestions: state.suggestions,
+          ),
+        )
+        .listen(
+      (SearchState state) {
+        add(
+          SearchCompleted(
+            resultState: state,
+          ),
+        );
+      },
+    );
+  }
 
-      final PaginatedResponse<ArtPreview> response =
-          await _artRepository.searchArtPreviews(
+  Stream<SearchState> _searchArt({
+    required String query,
+    required Set<String> currentSuggestions,
+  }) async* {
+    try {
+      yield SearchLoading(suggestions: currentSuggestions);
+
+      final PaginatedResponse<ArtPreview> response = await _artRepository.searchArtPreviews(
         SearchArtPreviewsInput(
-          query: event.query,
+          query: query,
           limit: 20,
           page: 1,
         ),
       );
 
-      emit(
-        SearchSuccess(
-          query: event.query,
-          artPreviews: List<ArtPreview>.from(response.data),
-          paginationState: SearchPaginationSuccess(
-            pagination: response.pagination,
-          ),
+      yield SearchSuccess(
+        query: query,
+        artPreviews: List<ArtPreview>.from(response.data),
+        paginationState: SearchPaginationSuccess(
+          pagination: response.pagination,
         ),
+        suggestions: currentSuggestions,
       );
     } catch (e) {
-      emit(
-        const SearchFailure(),
-      );
+      yield SearchFailure(suggestions: currentSuggestions);
     }
+  }
+
+  void _onQuery(
+    SearchQuery event,
+    Emitter<SearchState> emit,
+  ) {
+    _queryController.add(event.query);
+  }
+
+  void _handleSearchResult(
+    SearchCompleted event,
+    Emitter<SearchState> emit,
+  ) {
+    emit(event.resultState);
+  }
+
+  void _onSearchResultSelected(
+    SearchResultSelected event,
+    Emitter<SearchState> emit,
+  ) {
+    router.push(
+      DetailsRoute(artPreview: event.artPreview),
+    );
   }
 
   Future<void> _onPaginate(
@@ -70,8 +123,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         ),
       );
 
-      final PaginatedResponse<ArtPreview> response =
-          await _artRepository.searchArtPreviews(
+      final PaginatedResponse<ArtPreview> response = await _artRepository.searchArtPreviews(
         SearchArtPreviewsInput(
           query: state.query,
           limit: event.limit,
@@ -94,6 +146,24 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         ),
       );
     }
+  }
+
+  void _onUpdateSearchSuggestions(
+    UpdateSearchSuggestions event,
+    Emitter<SearchState> emit,
+  ) {
+    final SearchState state = this.state;
+
+    if (state is! SearchSuccess) return;
+
+    if (event.suggestion.isEmpty) return;
+
+    final Set<String> updateSuggestions = Set<String>.from(state.suggestions);
+    updateSuggestions.add(event.suggestion);
+
+    emit(
+      state.copyWith(suggestions: updateSuggestions),
+    );
   }
 
   Future<void> _onScroll(

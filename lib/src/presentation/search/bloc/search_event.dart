@@ -12,6 +12,14 @@ final class SearchQuery extends SearchEvent {
   });
 }
 
+final class SearchCompleted extends SearchEvent {
+  final SearchState resultState;
+
+  const SearchCompleted({
+    required this.resultState,
+  });
+}
+
 final class SearchPaginate extends SearchEvent {
   final int limit;
   final int page;
@@ -29,5 +37,21 @@ final class SearchScroll extends SearchEvent {
   const SearchScroll({
     required this.offset,
     required this.maxOffset,
+  });
+}
+
+final class UpdateSearchSuggestions extends SearchEvent {
+  final String suggestion;
+
+  const UpdateSearchSuggestions({
+    required this.suggestion,
+  });
+}
+
+final class SearchResultSelected extends SearchEvent {
+  final ArtPreview artPreview;
+
+  const SearchResultSelected({
+    required this.artPreview,
   });
 }

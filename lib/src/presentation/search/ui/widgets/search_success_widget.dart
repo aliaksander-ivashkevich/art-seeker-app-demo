@@ -62,7 +62,7 @@ class _SearchSuccessWidgetState extends State<SearchSuccessWidget> {
                 leading: SizedBox.square(
                   dimension: 70,
                   child: Image.network(
-                    artPreview.imageUrl,
+                    artPreview.previewImageUrl,
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) {
                       return const Icon(
@@ -84,6 +84,9 @@ class _SearchSuccessWidgetState extends State<SearchSuccessWidget> {
                   ].whereType<String>().join(', '),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () => _bloc.add(
+                  SearchResultSelected(artPreview: artPreview),
                 ),
               );
             },

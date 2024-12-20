@@ -16,9 +16,9 @@ class ArtPreview with _$ArtPreview {
 
   const ArtPreview._();
 
-  factory ArtPreview.fromJson(Map<String, dynamic> json) =>
-      _$ArtPreviewFromJson(json);
+  factory ArtPreview.fromJson(Map<String, dynamic> json) => _$ArtPreviewFromJson(json);
 
-  String get imageUrl =>
-      'https://www.artic.edu/iiif/2/$imageId/full/200,/0/default.jpg';
+  String get previewImageUrl => 'https://www.artic.edu/iiif/2/$imageId/full/200,/0/default.jpg';
+
+  String get fullImageUrl => 'https://www.artic.edu/iiif/2/$imageId/full/843,/0/default.jpg';
 }

@@ -7,7 +7,7 @@ class LandingContent extends StatelessWidget {
   const LandingContent({super.key});
 
   void _handleContinueTap() {
-    router.pushNamed('/search');
+    router.replaceNamed('/search');
   }
 
   @override
